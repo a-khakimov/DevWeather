@@ -1,0 +1,17 @@
+ToolChain
+sudo apt-get install binutils-arm-none-eabi gcc-arm-none-eabi
+sudo apt-get install gdb-arm-none-eabi
+
+ST-LINK
+sudo apt-get install cmake
+git clone https://github.com/texane/stlink
+cd stlink
+make
+cd build/Release
+make
+sudo make install
+
+sudo cp 49-stlinkv1.rules 49-stlinkv2.rules /etc/udev/rules.d
+sudo udevadm control --reload-rules
+
+st-flash  write firmware.bin  0x08000000
