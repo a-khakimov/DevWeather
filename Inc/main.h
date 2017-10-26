@@ -42,6 +42,7 @@
 
 /* USER CODE BEGIN Includes */
 #include "ds18b20.h"
+#include "display2004.h"
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/

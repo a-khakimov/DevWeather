@@ -41,6 +41,7 @@
 
 /* USER CODE BEGIN Includes */
 
+
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -99,10 +100,17 @@ int main(void)
   MX_USART1_UART_Init();
 
   /* USER CODE BEGIN 2 */
-  port_init();
-  status = ds18b20_init(SKIP_ROM);
-  sprintf(str1,"Init Status: %d\r\n",status);
-  HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+
+  Init_LCD();
+  HAL_Delay(10);
+  Curs_Off();
+  curs(1, 0);
+  Print_Lcd("Hello");
+  HAL_Delay(10000);
+  //port_init();
+  //status = ds18b20_init(SKIP_ROM);
+  //sprintf(str1,"Init Status: %d\r\n",status);
+  //HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
 
 
   /* USER CODE END 2 */
@@ -125,6 +133,8 @@ int main(void)
       HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
       HAL_Delay(100);
 #endif
+
+#if 0
     ds18b20_MeasureTemperCmd(SKIP_ROM, 0);
     HAL_Delay(800);
     ds18b20_ReadStratcpad(SKIP_ROM, dt, 0);
@@ -141,7 +151,7 @@ int main(void)
     sprintf(str1,"Raw t: 0x%04X; t: %c%.2f\r\n", raw_temper, c, temper);
     HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
     HAL_Delay(150);
-      
+#endif 
 
   }
   /* USER CODE END 3 */
@@ -236,6 +246,10 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6 
+                          |GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9, GPIO_PIN_RESET);
+
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -246,6 +260,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pin = GPIO_PIN_11;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PB3 PB4 PB5 PB6 
+                           PB7 PB8 PB9 */
+  GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6 
+                          |GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
