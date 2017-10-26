@@ -102,11 +102,8 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   Init_LCD();
-  HAL_Delay(10);
-  Curs_Off();
-  curs(1, 0);
-  Print_Lcd("Hello");
-  HAL_Delay(10000);
+  PrintF(1, 0, "Hello");
+
   //port_init();
   //status = ds18b20_init(SKIP_ROM);
   //sprintf(str1,"Init Status: %d\r\n",status);
@@ -134,7 +131,7 @@ int main(void)
       HAL_Delay(100);
 #endif
 
-#if 0
+#if 1
     ds18b20_MeasureTemperCmd(SKIP_ROM, 0);
     HAL_Delay(800);
     ds18b20_ReadStratcpad(SKIP_ROM, dt, 0);
@@ -148,7 +145,9 @@ int main(void)
     else 
       c='+';
     temper = ds18b20_Convert(raw_temper);
-    sprintf(str1,"Raw t: 0x%04X; t: %c%.2f\r\n", raw_temper, c, temper);
+    //sprintf(str1,"Raw t: 0x%04X; t: %c%.2f\r\n", raw_temper, c, temper);
+    sprintf(str1,"t:0x%04X; t: %c%.2f", raw_temper, c, temper);
+    PrintF(2, 0, &str1);
     HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
     HAL_Delay(150);
 #endif 

@@ -18,6 +18,7 @@
 
 void port_init(void);
 uint8_t ds18b20_init(uint8_t mode);
+void ds18b20_MeasureTemperCmd(uint8_t mode, uint8_t DevNum);
 
 
 #endif /* DS18B20_H_ */
