@@ -48,7 +48,7 @@ UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-
+char str1[60];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -69,6 +69,12 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+  uint8_t status;
+  uint8_t dt[8];
+  uint16_t raw_temper;
+  float temper;
+  char c;
+  
 
   /* USER CODE END 1 */
 
@@ -93,10 +99,12 @@ int main(void)
   MX_USART1_UART_Init();
 
   /* USER CODE BEGIN 2 */
-  unsigned char str[20];
-  sprintf(&str, "Hello World - ");
-  unsigned char str2[20];
-  sprintf(&str2, "%d\n\r", strlen(str));
+  port_init();
+  status = ds18b20_init(SKIP_ROM);
+  sprintf(str1,"Init Status: %d\r\n",status);
+  HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -106,15 +114,33 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
+#if 0
       HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
       HAL_Delay(1000);
       
-      HAL_UART_Transmit(&huart1, &str, strlen(str), 100);
+      status = ds18b20_init(SKIP_ROM);
+      sprintf(str1,"Init Status: %d\r\n",status);
+      HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
       
       HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
       HAL_Delay(100);
-      
-      HAL_UART_Transmit(&huart1, &str2, strlen(str2), 100);
+#endif
+    ds18b20_MeasureTemperCmd(SKIP_ROM, 0);
+    HAL_Delay(800);
+    ds18b20_ReadStratcpad(SKIP_ROM, dt, 0);
+    sprintf(str1,"STRATHPAD: %02X %02X %02X %02X %02X %02X %02X %02X; ", dt[0], dt[1], dt[2], dt[3], dt[4], dt[5], dt[6], dt[7]);
+    HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+    sprintf(str1,"\r\n");
+    HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+    raw_temper = ((uint16_t)dt[1]<<8)|dt[0];
+    if(ds18b20_GetSign(raw_temper)) 
+      c='-';
+    else 
+      c='+';
+    temper = ds18b20_Convert(raw_temper);
+    sprintf(str1,"Raw t: 0x%04X; t: %c%.2f\r\n", raw_temper, c, temper);
+    HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+    HAL_Delay(150);
       
 
   }
@@ -204,6 +230,7 @@ static void MX_GPIO_Init(void)
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
@@ -212,8 +239,14 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PB11 */
+  GPIO_InitStruct.Pin = GPIO_PIN_11;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 

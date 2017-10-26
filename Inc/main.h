@@ -41,7 +41,7 @@
   /* Includes ------------------------------------------------------------------*/
 
 /* USER CODE BEGIN Includes */
-
+#include "ds18b20.h"
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
