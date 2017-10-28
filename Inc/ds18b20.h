@@ -14,14 +14,20 @@
 #define RESOLUTION_11BIT 	0x5F
 #define RESOLUTION_12BIT 	0x7F
 
+#define _DEBUG
 
-void port_init(void);
-uint8_t ds18b20_Reset(void);
-uint8_t ds18b20_ReadBit(void);
-uint8_t ds18b20_ReadByte(void);
-void ds18b20_WriteBit(uint8_t bit);
-void ds18b20_WriteByte(uint8_t dt);
+#ifdef _DEBUG
+    #define _printf(...) sprintf(__VA_ARGS__);
+#else
+    #define _printf(...)
+#endif
+
+char str1[60];
+
+
+void GPIO_CUSTOM_INIT(void);
 uint8_t ds18b20_init(uint8_t mode);
+void ds18b20_all_sensors_init(void);
 void ds18b20_MeasureTemperCmd(uint8_t mode, uint8_t DevNum);
 void ds18b20_ReadStratcpad(uint8_t mode, uint8_t *Data, uint8_t DevNum);
 uint8_t ds18b20_GetSign(uint16_t dt);
