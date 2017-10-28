@@ -2,6 +2,7 @@
 #define DS18B20_H_
 
 #include "stm32f1xx_hal.h"
+#include "stm32f1xx_hal_uart.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -14,10 +15,12 @@
 #define RESOLUTION_11BIT 	0x5F
 #define RESOLUTION_12BIT 	0x7F
 
+extern UART_HandleTypeDef huart1;
+
 #define _DEBUG
 
 #ifdef _DEBUG
-    #define _printf(...) sprintf(__VA_ARGS__);
+    #define _printf(...)	sprintf(__VA_ARGS__);   HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);	
 #else
     #define _printf(...)
 #endif

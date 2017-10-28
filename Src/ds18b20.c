@@ -12,6 +12,7 @@ __STATIC_INLINE void DelayMicro(__IO uint32_t micros) {
     while (micros--) ;
 }
 
+// Иницивлизация вывода микроконтроллера к которому подключены датчики
 void GPIO_CUSTOM_INIT(void) {
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_11);
     GPIOB->CRH |= GPIO_CRH_MODE11;
@@ -70,8 +71,8 @@ uint8_t ds18b20_SearhRom(uint8_t *Addr) {
     uint8_t id_bit_number;
     uint8_t last_zero, rom_byte_number, search_result;
     uint8_t id_bit, cmp_id_bit;
-    uint8_t rom_byte_mask, search_direction;
-    //ïðîèíèöèàëèçèðóåì ïåðåìåííûå
+    uint8_t rom_byte_mask, search_direction;    
+	//проинициализируем переменные
     id_bit_number = 1;
     last_zero = 0;
     rom_byte_number = 0;
@@ -111,19 +112,17 @@ uint8_t ds18b20_SearhRom(uint8_t *Addr) {
             ds18b20_WriteBit(search_direction);
             id_bit_number++;
             rom_byte_mask <<= 1;
-            if (rom_byte_mask == 0)
+            if (!rom_byte_mask)
             {
-                rom_byte_number++;
+                ++rom_byte_number;
                 rom_byte_mask = 1;
             }
         }
-    } while(rom_byte_number < 8); // ñ÷èòûâàåì áàéòû ñ 0 äî 7 â öèêëå
+    } while(rom_byte_number < 8);		// ñ÷èòûâàåì áàéòû ñ 0 äî 7 â öèêëå
     if (!(id_bit_number < 65))
     {
-        // search successful so set LastDiscrepancy,LastDeviceFlag,search_result
-        LastDiscrepancy = last_zero;
-        // check for last device
-        if (LastDiscrepancy == 0)
+        LastDiscrepancy = last_zero;	// search successful so set LastDiscrepancy,LastDeviceFlag,search_result
+        if (!LastDiscrepancy)		// check for last device
             LastDeviceFlag = 1;
         search_result = 1;	
     }
@@ -144,50 +143,41 @@ uint8_t ds18b20_SearhRom(uint8_t *Addr) {
 
 uint8_t ds18b20_init(uint8_t mode)
 {
-    int i = 0, j=0;
+    int i = 0, j = 0;
     uint8_t dt[8];
-    if(mode==SKIP_ROM)
+    if(mode == SKIP_ROM)
     {
-        if(ds18b20_Reset()) return 1;
-        //SKIP ROM
-        ds18b20_WriteByte(0xCC);
-        //WRITE SCRATCHPAD
-        ds18b20_WriteByte(0x4E);
-        //TH REGISTER 100 ãðàäóñîâ
-        ds18b20_WriteByte(0x64);
-        //TL REGISTER - 30 ãðàäóñîâ
-        ds18b20_WriteByte(0x9E);
-        //Resolution 12 bit
-        ds18b20_WriteByte(RESOLUTION_12BIT);
+        if(ds18b20_Reset()) 
+        	return 1;
+        ds18b20_WriteByte(0xCC);	//SKIP ROM
+        ds18b20_WriteByte(0x4E);	//WRITE SCRATCHPAD
+        ds18b20_WriteByte(0x64);	//TH REGISTER 100 градусов
+        ds18b20_WriteByte(0x9E);	//TL REGISTER - 30 градусов
+        ds18b20_WriteByte(RESOLUTION_12BIT);	//Resolution 12 bit
     }
     else
     {
-        for(i=1;i<=8;i++)
+        for(i = 1; i <= 8; ++i)
         {
             if(ds18b20_SearhRom(dt))
             {
                 Dev_Cnt++;
-                memcpy(Dev_ID[Dev_Cnt-1],dt,sizeof(dt));
+                memcpy(Dev_ID[Dev_Cnt-1], dt, sizeof(dt));
             }
-            else break;
+            else 
+            	break;
         }
-        for(i=1;i<=Dev_Cnt;i++)
+        for(i = 1; i <= Dev_Cnt; i++)
         {
-            if(ds18b20_Reset()) return 1;
-            //Match Rom
-            ds18b20_WriteByte(0x55);
-            for(j=0;j<=7;j++)
-            {
+            if(ds18b20_Reset()) 
+            	return 1;
+            ds18b20_WriteByte(0x55);	//Match Rom
+            for(j = 0; j <= 7; ++j)
                 ds18b20_WriteByte(Dev_ID[i-1][j]);
-            }
-            //WRITE SCRATCHPAD
-            ds18b20_WriteByte(0x4E);
-            //TH REGISTER 100 ãðàäóñîâ
-            ds18b20_WriteByte(0x64);
-            //TL REGISTER - 30 ãðàäóñîâ
-            ds18b20_WriteByte(0x9E);
-            //Resolution 12 bit
-            ds18b20_WriteByte(RESOLUTION_12BIT);
+            ds18b20_WriteByte(0x4E);	//WRITE SCRATCHPAD
+            ds18b20_WriteByte(0x64);	//TH REGISTER 100 градусов
+            ds18b20_WriteByte(0x9E);	//TL REGISTER - 30 градусов
+            ds18b20_WriteByte(RESOLUTION_12BIT);	//Resolution 12 bit
         }
     }
     return 0;
@@ -195,79 +185,56 @@ uint8_t ds18b20_init(uint8_t mode)
 
 void ds18b20_all_sensors_init()
 {
-	int i = 0;
 	uint8_t status = ds18b20_init(NO_SKIP_ROM);
     sprintf(str1, "Init Status: %d\r\n", status);
-    //HAL_UART_Transmit(&huart1, (uint8_t*)str1,strlen(str1), 0x1000);
     sprintf(str1, "Dev count: %d\r\n", Dev_Cnt);
-    //HAL_UART_Transmit(&huart1, (uint8_t*)str1,strlen(str1), 0x1000);
+    int i = 0;
     for(i = 1; i <= Dev_Cnt; i++)
     {
         _printf(str1,"Device %d\r\n", i);
-        //HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
-        _printf(str1,"ROM RAW: %02X %02X %02X %02X %02X %02X %02X %02X\r\n", Dev_ID[i-1][0], Dev_ID[i-1][1], Dev_ID[i-1][2], Dev_ID[i-1][3], Dev_ID[i-1][4], Dev_ID[i-1][5], Dev_ID[i-1][6], Dev_ID[i-1][7]);
-        //HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+        _printf(str1,"ROM RAW: %02X-%02X-%02X-%02X-%02X-%02X-%02X-%02X\r\n", Dev_ID[i-1][0], Dev_ID[i-1][1], Dev_ID[i-1][2], Dev_ID[i-1][3], Dev_ID[i-1][4], Dev_ID[i-1][5], Dev_ID[i-1][6], Dev_ID[i-1][7]);
         _printf(str1,"Family CODE: 0x%02X\r\n", Dev_ID[i-1][0]);
-        //HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
         _printf(str1,"ROM CODE: 0x%02X%02X%02X%02X%02X%02X\r\n", Dev_ID[i-1][6], Dev_ID[i-1][5], Dev_ID[i-1][4], Dev_ID[i-1][3], Dev_ID[i-1][2], Dev_ID[i-1][1]);
-        //HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
         _printf(str1,"CRC: 0x%02X\r\n", Dev_ID[i-1][7]);
-        //HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
     }
 }
 
 
 void ds18b20_MeasureTemperCmd(uint8_t mode, uint8_t DevNum)
 {
-    int i = 0;
     ds18b20_Reset();
-    if(mode==SKIP_ROM)
-    {
-        //SKIP ROM
-        ds18b20_WriteByte(0xCC);
-    }
+    if(mode == SKIP_ROM)
+        ds18b20_WriteByte(0xCC);	//SKIP ROM
     else
     {
-        //Match Rom
-        ds18b20_WriteByte(0x55);
-        for(i=0;i<=7;i++)
-        {
+        ds18b20_WriteByte(0x55);	//Match Rom
+        int i = 0;
+        for(i = 0; i <= 7; i++)
             ds18b20_WriteByte(Dev_ID[DevNum-1][i]);
-        }
     }
-    //CONVERT T
-    ds18b20_WriteByte(0x44);
+    ds18b20_WriteByte(0x44);		//CONVERT T
 }
 
 void ds18b20_ReadStratcpad(uint8_t mode, uint8_t *Data, uint8_t DevNum)
 {
-    uint8_t i;
+    uint8_t i = 0;
     ds18b20_Reset();
-    if(mode==SKIP_ROM)
-    {
-        //SKIP ROM
-        ds18b20_WriteByte(0xCC);
-    }
+    if(mode == SKIP_ROM)
+        ds18b20_WriteByte(0xCC);	//SKIP ROM
     else
     {
-        //Match Rom
-        ds18b20_WriteByte(0x55);
-        for(i=0;i<=7;i++)
-        {
+        ds18b20_WriteByte(0x55);	//Match Rom
+        for(i = 0; i <= 7; i++)
             ds18b20_WriteByte(Dev_ID[DevNum-1][i]);
-        }
     }
-    //READ SCRATCHPAD
-    ds18b20_WriteByte(0xBE);
-    for(i=0;i<8;i++)
-    {
+    
+    ds18b20_WriteByte(0xBE);		//READ SCRATCHPAD
+    for (i = 0; i < 8; i++)
         Data[i] = ds18b20_ReadByte();
-    }
 }
 
-uint8_t ds18b20_GetSign(uint16_t dt) {
-    //Проверим 11-й бит
-    if (dt&(1 << 11)) 
+uint8_t ds18b20_GetSign(uint16_t dt) {    
+    if (dt&(1 << 11)) //Проверим 11-й бит
         return 1;
     else 
         return 0;

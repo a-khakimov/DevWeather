@@ -49,7 +49,6 @@ UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-char str1[60];
 uint8_t Dev_ID[8][8];
 uint8_t Dev_Cnt;
 /* USER CODE END PV */
@@ -121,22 +120,18 @@ int main(void)
       
 #if 1
         
-        for(i=1;i<=Dev_Cnt;i++)
-        {
+        for(i = 1; i <= Dev_Cnt; i++)
             ds18b20_MeasureTemperCmd(NO_SKIP_ROM, i);
-        }
-        for(i=1;i<=Dev_Cnt;i++)
+        for(i = 1; i <= Dev_Cnt; i++)
         {
             ds18b20_ReadStratcpad(NO_SKIP_ROM, dt, i);
-            _printf(str1,"STRATHPAD %d: %02X %02X %02X %02X %02X %02X %02X %02X; ", i, dt[0], dt[1], dt[2], dt[3], dt[4], dt[5], dt[6], dt[7]);
-            HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
-            raw_temper = ((uint16_t)dt[1]<<8)|dt[0];
+            _printf(str1, "STRATHPAD %d: %02X %02X %02X %02X %02X %02X %02X %02X; ", i, dt[0], dt[1], dt[2], dt[3], dt[4], dt[5], dt[6], dt[7]);
+            raw_temper = ((uint16_t)dt[1] << 8) | dt[0];
             if(ds18b20_GetSign(raw_temper)) 
               c='-';
             else 
               c='+';
             _printf(str1,"Raw t: 0x%04X; t: %c%d\r\n", raw_temper, c, (int)ds18b20_Convert(raw_temper));
-            HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
         }
         HAL_Delay(10);
         
