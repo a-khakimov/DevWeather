@@ -241,8 +241,8 @@ uint8_t ds18b20_GetSign(uint16_t dt) {
 }
 
 float ds18b20_Convert(uint16_t dt) {
-    float t = (float)((dt&0x07FF) >> 4);	//отборосим знаковые и дробные биты
-    t += (float)(dt&0x000F) / 16.0f;		//Прибавим дробную часть
-    return t;
+    float t = (float)((dt & 0x07FF) >> 4);	//отборосим знаковые и дробные биты
+    t += (float)(dt & 0x000F) / 16.0f;		//Прибавим дробную часть
+    return (t);
 }
 

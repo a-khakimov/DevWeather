@@ -32,7 +32,7 @@
 
 void Init_LCD(void);
 void curs(int str, int num);
-void PrintF(int str, int num, const char* hh);
+void PrintF(uint8_t str, uint8_t num, const char* hh);
 
 
 #endif /* DISPLAY2004_H_ */

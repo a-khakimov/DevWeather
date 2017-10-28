@@ -71,12 +71,12 @@ int main(void)
 {
     
     /* USER CODE BEGIN 1 */
-    uint8_t status;
+    uint8_t status, valcnt = 0;
     uint8_t dt[8];
     uint16_t raw_temper, i;
     float temper;
     char c;
-    
+    float opp = 90.6;
     
     /* USER CODE END 1 */
     
@@ -103,8 +103,6 @@ int main(void)
     /* USER CODE BEGIN 2 */
     
     Init_LCD();
-    PrintF(1, 0, "Hello");
-    
     GPIO_CUSTOM_INIT();
     ds18b20_all_sensors_init();
     
@@ -117,26 +115,35 @@ int main(void)
         /* USER CODE END WHILE */
         
         /* USER CODE BEGIN 3 */
-      
-#if 1
-        
-        for(i = 1; i <= Dev_Cnt; i++)
+      #if 1
+        PrintF(1, 0, "DevWeather");    
+        for (i = 1; i <= Dev_Cnt; i++)
             ds18b20_MeasureTemperCmd(NO_SKIP_ROM, i);
-        for(i = 1; i <= Dev_Cnt; i++)
+        for (i = 1; i <= Dev_Cnt; i++)
         {
             ds18b20_ReadStratcpad(NO_SKIP_ROM, dt, i);
-            _printf(str1, "STRATHPAD %d: %02X %02X %02X %02X %02X %02X %02X %02X; ", i, dt[0], dt[1], dt[2], dt[3], dt[4], dt[5], dt[6], dt[7]);
             raw_temper = ((uint16_t)dt[1] << 8) | dt[0];
-            if(ds18b20_GetSign(raw_temper)) 
-              c='-';
-            else 
-              c='+';
-            _printf(str1,"Raw t: 0x%04X; t: %c%d\r\n", raw_temper, c, (int)ds18b20_Convert(raw_temper));
+            c = ds18b20_GetSign(raw_temper) ? '-' : '+';
+            if (i == 1)
+            {
+              if((int8_t)(raw_temper >> 4) < 0)
+                sprintf(str1,"In_DOOR: %d,%d C ", (int8_t)(raw_temper >> 4), (0x000F & raw_temper)/10);
+              else
+                sprintf(str1,"In_DOOR: %c%d,%d C ", c, (int8_t)(raw_temper >> 4), (0x000F & raw_temper)/10);
+                //sprintf(str1,"In_DOOR: %c%d,%d C ", c, ((int16_t)(ds18b20_Convert(raw_temper))), (int16_t)(ds18b20_Convert(raw_temper)*100)%10);
+              PrintF(2, 0, &str1);
+            } else if (i == 2)
+            {
+              if((int8_t)(raw_temper >> 4) < 0)
+                sprintf(str1,"OutDOOR: %d,%d C ", (int8_t)(raw_temper >> 4), (0x000F & raw_temper)/10);
+              else
+                sprintf(str1,"OutDOOR: %c%d,%d C ", c, (int8_t)(raw_temper >> 4), (0x000F & raw_temper)/10);
+              PrintF(3, 0, &str1);
+            } else 
+              break;
         }
-        HAL_Delay(10);
-        
-#endif
-        
+        HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+        #endif
     }
     /* USER CODE END 3 */
     

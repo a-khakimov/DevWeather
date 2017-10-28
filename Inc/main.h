@@ -43,6 +43,8 @@
 /* USER CODE BEGIN Includes */
 #include "ds18b20.h"
 #include "display2004.h"
+#include "stdio.h"
+#include "stdlib.h"
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
