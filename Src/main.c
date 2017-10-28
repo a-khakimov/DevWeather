@@ -104,10 +104,10 @@ int main(void)
   Init_LCD();
   PrintF(1, 0, "Hello");
 
-  //port_init();
-  //status = ds18b20_init(SKIP_ROM);
-  //sprintf(str1,"Init Status: %d\r\n",status);
-  //HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+  GPIO_CUSTOM_INIT();
+  status = ds18b20_init(SKIP_ROM);
+  sprintf(str1,"Init Status: %d\r\n",status);
+  HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
 
 
   /* USER CODE END 2 */
@@ -135,20 +135,20 @@ int main(void)
     ds18b20_MeasureTemperCmd(SKIP_ROM, 0);
     HAL_Delay(800);
     ds18b20_ReadStratcpad(SKIP_ROM, dt, 0);
-    sprintf(str1,"STRATHPAD: %02X %02X %02X %02X %02X %02X %02X %02X; ", dt[0], dt[1], dt[2], dt[3], dt[4], dt[5], dt[6], dt[7]);
-    HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+    //sprintf(str1,"STRATHPAD: %02X %02X %02X %02X %02X %02X %02X %02X; ", dt[0], dt[1], dt[2], dt[3], dt[4], dt[5], dt[6], dt[7]);
+    //HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
     sprintf(str1,"\r\n");
     HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
-    raw_temper = ((uint16_t)dt[1]<<8)|dt[0];
+    raw_temper = ((uint16_t)dt[1] << 8) | dt[0];
     if(ds18b20_GetSign(raw_temper)) 
       c='-';
     else 
       c='+';
     temper = ds18b20_Convert(raw_temper);
     //sprintf(str1,"Raw t: 0x%04X; t: %c%.2f\r\n", raw_temper, c, temper);
-    sprintf(str1,"t:0x%04X; t: %c%.2f", raw_temper, c, temper);
+    sprintf(str1,"Inside: %c%d", c, (int)temper);
     PrintF(2, 0, &str1);
-    HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+    HAL_UART_Transmit(&huart1, (uint8_t*)str1, strlen(str1), 0x1000);
     HAL_Delay(150);
 #endif 
 
