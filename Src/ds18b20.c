@@ -1,5 +1,6 @@
 #include "ds18b20.h"
 
+UART_HandleTypeDef huart1;
 uint8_t LastDeviceFlag, LastDiscrepancy, LastFamilyDiscrepancy;
 uint8_t ROM_NO[8];
 extern uint8_t Dev_ID[8][8];
@@ -186,8 +187,8 @@ uint8_t ds18b20_init(uint8_t mode)
 void ds18b20_all_sensors_init()
 {
 	uint8_t status = ds18b20_init(NO_SKIP_ROM);
-    sprintf(str1, "Init Status: %d\r\n", status);
-    sprintf(str1, "Dev count: %d\r\n", Dev_Cnt);
+    _printf(str1, "Init Status: %d\r\n", status);
+    _printf(str1, "Dev count: %d\r\n", Dev_Cnt);
     int i = 0;
     for(i = 1; i <= Dev_Cnt; i++)
     {

@@ -38,6 +38,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f1xx_hal.h"
+#include <unistd.h>
 
 /* USER CODE BEGIN Includes */
 
@@ -115,8 +116,8 @@ int main(void)
         /* USER CODE END WHILE */
         
         /* USER CODE BEGIN 3 */
-      #if 1
-        PrintF(1, 0, "DevWeather");    
+        PrintF(1, 0, "");    
+        #if 1
         for (i = 1; i <= Dev_Cnt; i++)
             ds18b20_MeasureTemperCmd(NO_SKIP_ROM, i);
         for (i = 1; i <= Dev_Cnt; i++)
@@ -126,24 +127,28 @@ int main(void)
             c = ds18b20_GetSign(raw_temper) ? '-' : '+';
             if (i == 1)
             {
-              if((int8_t)(raw_temper >> 4) < 0)
-                sprintf(str1,"In_DOOR: %d,%d C ", (int8_t)(raw_temper >> 4), (0x000F & raw_temper)/10);
-              else
-                sprintf(str1,"In_DOOR: %c%d,%d C ", c, (int8_t)(raw_temper >> 4), (0x000F & raw_temper)/10);
-                //sprintf(str1,"In_DOOR: %c%d,%d C ", c, ((int16_t)(ds18b20_Convert(raw_temper))), (int16_t)(ds18b20_Convert(raw_temper)*100)%10);
+              if ((int8_t)(raw_temper >> 4) < 0) {
+                sprintf(str1,"Home: %d,%d C ", (int8_t)(raw_temper >> 4), (0x000F & raw_temper)/10);
+              } else {
+                sprintf(str1,"Home: %c%d,%d C ", c, (int8_t)(raw_temper >> 4), (0x000F & raw_temper)/10);
+                sprintf(str1,"Home: %c%d,%d C ", c, ((int16_t)(ds18b20_Convert(raw_temper))), (int16_t)(ds18b20_Convert(raw_temper)*100)%10);
+              }
               PrintF(2, 0, &str1);
-            } else if (i == 2)
-            {
-              if((int8_t)(raw_temper >> 4) < 0)
-                sprintf(str1,"OutDOOR: %d,%d C ", (int8_t)(raw_temper >> 4), (0x000F & raw_temper)/10);
-              else
-                sprintf(str1,"OutDOOR: %c%d,%d C ", c, (int8_t)(raw_temper >> 4), (0x000F & raw_temper)/10);
+            } else if (i == 2) {
+              if ((int8_t)(raw_temper >> 4) < 0) {
+                sprintf(str1,"Street: %d,%d C ", (int8_t)(raw_temper >> 4), (0x000F & raw_temper)/10);
+              } else {
+                sprintf(str1,"Street: %c%d,%d C ", c, (int8_t)(raw_temper >> 4), (0x000F & raw_temper)/10);
+              }
               PrintF(3, 0, &str1);
-            } else 
+            } else {
               break;
+            }
+            _printf(str1, "%s\n", str1);
         }
-        HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
         #endif
+        HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+        HAL_Delay(1000);
     }
     /* USER CODE END 3 */
     
